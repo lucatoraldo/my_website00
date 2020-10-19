@@ -7,8 +7,6 @@ output: html_document
 
 
 
-<div id="general-social-survey-gss" class="section level1">
-<h1>General Social Survey (GSS)</h1>
 <p>The <a href="http://www.gss.norc.org/">General Social Survey (GSS)</a> gathers data on American society in order to monitor and explain trends in attitudes, behaviors, and attributes. Many trends have been tracked for decades, so one can see the evolution of attitudes, etc. in American society.</p>
 <p>Here, we analyze data from the <strong>2016 GSS sample data</strong>, using it to estimate values of <em>population parameters</em> of interest about US adults. The GSS sample data file has 2,867 observations of 935 variables, but we are only interested in very few of these variables.</p>
 <pre class="r"><code>gss &lt;- read_csv(here::here(&quot;data&quot;, &quot;smallgss2016.csv&quot;), 
@@ -190,5 +188,4 @@ gss_email_CI</code></pre>
 ## 1     386.     451.</code></pre>
 <p>Our 95% bootstrap confidence interval shows that, with 95% confidence, the true mean amount of time Americans spend on email weekly falls between the following two values: 6 hours and 27 minutes and 7 hours and 30 minutes. Taking into consideration the graphic distribution of the variable, the result seems to exaggerate the actual amount of time Americans spend checking their emails. We believe the presence of extreme values, combined with the right skew distribution of the variable, can explain the overestimation.</p>
 <p>We would expect a 99% confidence interval to be wider because it would need to capture a greater share of the possible values. For this reason, the higher the confidence level, the wider the interval is.</p>
-</div>
 </div>

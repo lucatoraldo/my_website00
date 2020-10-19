@@ -33,7 +33,6 @@ library(scales)
 library(tidytext)
 ```
 
-# General Social Survey (GSS)
 
 The [General Social Survey (GSS)](http://www.gss.norc.org/) gathers data on American society in order to monitor and explain trends in attitudes, behaviors, and attributes. Many trends have been tracked for decades, so one can see the evolution of attitudes, etc. in American society.
 

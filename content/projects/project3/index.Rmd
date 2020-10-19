@@ -33,7 +33,6 @@ library(scales)
 library(tidytext)
 ```
 
-# Trump's Approval Margins
 
 As we saw earlier, fivethirtyeight.com has detailed data on [all polls that track the president's approval](https://projects.fivethirtyeight.com/trump-approval-ratings)
 ```{r, cache=TRUE}

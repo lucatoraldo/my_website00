@@ -7,8 +7,6 @@ output: html_document
 
 
 
-<div id="trumps-approval-margins" class="section level1">
-<h1>Trump’s Approval Margins</h1>
 <p>As we saw earlier, fivethirtyeight.com has detailed data on <a href="https://projects.fivethirtyeight.com/trump-approval-ratings">all polls that track the president’s approval</a></p>
 <pre class="r"><code>approval_polllist &lt;- read_csv(here::here(&#39;data&#39;, &#39;approval_polllist.csv&#39;))
 glimpse(approval_polllist)</code></pre>
@@ -60,5 +58,4 @@ glimpse(approval_polllist)</code></pre>
 ## # … with 3 more variables: margin_approval &lt;dbl&gt;, approval_low &lt;dbl&gt;,
 ## #   approval_high &lt;dbl&gt;</code></pre>
 <p>We can see that confidence interval for week 15 is slightly narrower than that for week 34 due to a higher standard deviation driving a higher standard error. This may be due to a combination of data that was released in mid-August, including a not-improving COVID-19 situation in the United States coupled with disappointing economic data. The wider confidence interval results in a wider array of values over which we can be 95% confident represent the true share of the population that approves of the President.</p>
-</div>
 </div>
