@@ -94,7 +94,7 @@ disqusShortname = ""
     [[params.tiles.showcase]]
       title = "Where Do People Drink The Most Beer, Wine And Spirits?"
       subtitle = "An analysis on the most popular spirits by country"
-      image = "pic01.jpg"
+      image = "social.jpg"
       url = "projects/project1"
 
     [[params.tiles.showcase]]
