@@ -94,25 +94,25 @@ disqusShortname = ""
     [[params.tiles.showcase]]
       title = "Where Do People Drink The Most Beer, Wine And Spirits?"
       subtitle = "An analysis on the most popular spirits by country"
-      image = "social.jpg"
-      url = "projects/social.jpg"
+      image = "projects/spirits.jpg"
+      url = "projects/project1"
 
     [[params.tiles.showcase]]
       title = "General Social Survey (GSS)"
       subtitle = "Trends in attitudes and behaviors for Instagram, Snapchap, Twitter and email users"
-      image = "pic02.jpg"
+      image = "projects/social.jpg"
       url = "projects/project2"
 
     [[params.tiles.showcase]]
       title = "Trump's Approval Margins"
       subtitle = "A glimpse into the polls that track the President's approval"
-      image = "pic03.jpg"
+      image = "projects/trump.jpg"
       url = "projects/project3"
 
     [[params.tiles.showcase]]
       title = "Youth Risk Behavior Surveillance"
       subtitle = "A study on the health patterns of high schoolers"
-      image = "pic04.jpg"
+      image = "projects/kids.jpg"
       url = "projects/project4"
 
     # [[params.tiles.showcase]]
