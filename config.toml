@@ -110,8 +110,8 @@ disqusShortname = ""
       url = "projects/project3"
 
     [[params.tiles.showcase]]
-      title = "Ipsum"
-      subtitle = "Nisl Sed Aliquam"
+      title = "Youth Risk Behavior Surveillance"
+      subtitle = "A study on the health patterns of high schoolers"
       image = "pic04.jpg"
       url = "projects/project4"
 

@@ -1,0 +1,194 @@
+---
+title: "Youth Risk Behavior Surveillance"
+author: "Luca Toraldo"
+date: "10/19/2020"
+output: html_document
+---
+
+
+
+<div id="youth-risk-behavior-surveillance" class="section level1">
+<h1>Youth Risk Behavior Surveillance</h1>
+<p>Every two years, the Centers for Disease Control and Prevention conduct the <a href="https://www.cdc.gov/healthyyouth/data/yrbs/index.htm">Youth Risk Behavior Surveillance System (YRBSS)</a> survey, where it takes data from high schoolers (9th through 12th grade) to analyze health patterns. We will work with a selected group of variables from a random sample of observations during one of the years the YRBSS was conducted.</p>
+<div id="load-the-data" class="section level2">
+<h2>Load the data</h2>
+<p>This data is part of the <code>openintro</code> textbook and we can load and inspect it. There are observations on 13 different variables, some categorical and some numerical.</p>
+<pre class="r"><code># Loading the YRBSS data set
+data(yrbss)
+
+# Examining the variables and observations in the data set
+glimpse(yrbss)</code></pre>
+<pre><code>## Rows: 13,583
+## Columns: 13
+## $ age                      &lt;int&gt; 14, 14, 15, 15, 15, 15, 15, 14, 15, 15, 15, …
+## $ gender                   &lt;chr&gt; &quot;female&quot;, &quot;female&quot;, &quot;female&quot;, &quot;female&quot;, &quot;fem…
+## $ grade                    &lt;chr&gt; &quot;9&quot;, &quot;9&quot;, &quot;9&quot;, &quot;9&quot;, &quot;9&quot;, &quot;9&quot;, &quot;9&quot;, &quot;9&quot;, &quot;9&quot;,…
+## $ hispanic                 &lt;chr&gt; &quot;not&quot;, &quot;not&quot;, &quot;hispanic&quot;, &quot;not&quot;, &quot;not&quot;, &quot;not…
+## $ race                     &lt;chr&gt; &quot;Black or African American&quot;, &quot;Black or Afric…
+## $ height                   &lt;dbl&gt; NA, NA, 1.73, 1.60, 1.50, 1.57, 1.65, 1.88, …
+## $ weight                   &lt;dbl&gt; NA, NA, 84.4, 55.8, 46.7, 67.1, 131.5, 71.2,…
+## $ helmet_12m               &lt;chr&gt; &quot;never&quot;, &quot;never&quot;, &quot;never&quot;, &quot;never&quot;, &quot;did not…
+## $ text_while_driving_30d   &lt;chr&gt; &quot;0&quot;, NA, &quot;30&quot;, &quot;0&quot;, &quot;did not drive&quot;, &quot;did no…
+## $ physically_active_7d     &lt;int&gt; 4, 2, 7, 0, 2, 1, 4, 4, 5, 0, 0, 0, 4, 7, 7,…
+## $ hours_tv_per_school_day  &lt;chr&gt; &quot;5+&quot;, &quot;5+&quot;, &quot;5+&quot;, &quot;2&quot;, &quot;3&quot;, &quot;5+&quot;, &quot;5+&quot;, &quot;5+&quot;…
+## $ strength_training_7d     &lt;int&gt; 0, 0, 0, 0, 1, 0, 2, 0, 3, 0, 3, 0, 0, 7, 7,…
+## $ school_night_hours_sleep &lt;chr&gt; &quot;8&quot;, &quot;6&quot;, &quot;&lt;5&quot;, &quot;6&quot;, &quot;9&quot;, &quot;8&quot;, &quot;9&quot;, &quot;6&quot;, &quot;&lt;5…</code></pre>
+</div>
+<div id="exploratory-data-analysis" class="section level2">
+<h2>Exploratory Data Analysis</h2>
+<p>We will first start with analyzing the <code>weight</code> of participants in kilograms. Using visualization and summary statistics, we will describe the distribution of weights.We are missing 1,004 observations for weight in the data set.</p>
+<pre class="r"><code>yrbss_weights &lt;- yrbss %&gt;% 
+
+  # Filtering for missing values in &#39;weight&#39;
+   filter(!weight %in% NA) %&gt;% 
+
+  # Generating summary statistics
+  summarise(mean = mean(weight),
+            median = median(weight),
+            max = max(weight),
+            min = min(weight),
+            sd = sd(weight))
+
+# Displaying summary statistics
+yrbss_weights</code></pre>
+<pre><code>## # A tibble: 1 x 5
+##    mean median   max   min    sd
+##   &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1  67.9   64.4  181.  29.9  16.9</code></pre>
+<pre class="r"><code># Creating distribution histogram
+ggplot(yrbss, aes(x = weight)) +
+  geom_histogram() +
+  scale_y_continuous(label = comma) +
+  theme_bw() +
+  labs(title = &quot;Weighty Children&quot;,
+       subtitle = &quot;Distribution of Weights for American High Schoolers&quot;,
+       x = &quot;Weight (kg)&quot;,
+       y = &quot;Count&quot;,
+       caption = &quot;Source: CDC&quot;)</code></pre>
+<p><img src="index_files/figure-html/eda_on_weight-1.png" width="648" style="display: block; margin: auto;" /></p>
+<p>Next, we consider the possible relationship between a high schooler’s weight and their physical activity. Plotting the data is a useful first step because it helps us quickly visualize trends, identify strong associations, and develop research questions.</p>
+<p>Let’s create a new variable <code>physical_3plus</code>, which will be <code>yes</code> if they are physically active for at least 3 days a week, and <code>no</code> otherwise.</p>
+<pre class="r"><code>yrbss &lt;- yrbss %&gt;% 
+
+  # Creating &#39;physical_3plus&#39; variable and adding it to data set
+  mutate(physical_3plus = ifelse(physically_active_7d &gt;= 3, &quot;yes&quot;, &quot;no&quot;))
+
+yrbss %&gt;% 
+  
+# Filtering for missing values in &#39;physical_3plus&#39;
+  filter(!is.na(physical_3plus)) %&gt;% 
+  
+# Finding proportion of high schoolers that do and do not get adequate physical activity  
+  group_by(physical_3plus) %&gt;% 
+  summarise(count = n()) %&gt;% 
+  mutate(prop = count / sum(count))</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   physical_3plus count  prop
+##   &lt;chr&gt;          &lt;int&gt; &lt;dbl&gt;
+## 1 no              4404 0.331
+## 2 yes             8906 0.669</code></pre>
+<p>Here is a 95% confidence interval for the population proportion of high schoolers that are <em>NOT</em> active 3 or more days per week.</p>
+<pre class="r"><code># Creating bootstrap simulation to generate confidence interval
+weight_ci &lt;- yrbss %&gt;% 
+  specify(response = physical_3plus, success = &quot;no&quot;) %&gt;% 
+  generate(reps = 1000, type = &quot;bootstrap&quot;) %&gt;% 
+  calculate(stat = &quot;prop&quot;) %&gt;% 
+  get_confidence_interval(level = 0.95, type = &quot;percentile&quot;)
+weight_ci</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   lower_ci upper_ci
+##      &lt;dbl&gt;    &lt;dbl&gt;
+## 1    0.323    0.338</code></pre>
+<p>Below is a boxplot of <code>physical_3plus</code> vs. <code>weight</code>. There appears to be a weak relationship between these two variables. Both medians are around the 60 to 70 kg range and both categories contain a high number of outliers on the higher end. While this is generally not what would be expected from this information, a possible shortcoming is that ‘weight’ captures both fat and muscle, meaning that some of the high-end outliers for the ‘yes’ group could be students that are highly fit and muscular.</p>
+<pre class="r"><code># Creating boxplot broken down by &#39;physical_3plus&#39;
+weight_box &lt;- yrbss %&gt;% 
+  filter(!physical_3plus %in% NA) %&gt;% 
+  ggplot(aes(x = weight, y = physical_3plus)) +
+  geom_boxplot() +
+  theme_bw() +
+  labs(title = &quot;Muscle Mass?&quot;,
+       subtitle = &quot;Distribution of Weights for American High Schoolers by Physical Activity&quot;,
+       x = &quot;Weight (kg)&quot;,
+       y = &quot;3+ Hours of Physcical Activity per Day&quot;,
+       caption = &quot;Source: CDC&quot;)
+weight_box</code></pre>
+<p><img src="index_files/figure-html/boxplot-1.png" width="648" style="display: block; margin: auto;" /></p>
+</div>
+<div id="confidence-interval" class="section level2">
+<h2>Confidence Interval</h2>
+<p>Boxplots show how the medians of the two distributions compare, but we can also compare the means of the distributions using either a confidence interval or a hypothesis test.</p>
+<pre class="r"><code>yrbss %&gt;%
+  group_by(physical_3plus) %&gt;%
+  filter(!is.na(physical_3plus)) %&gt;% 
+  
+# Generating summary statistics that will be used to create confidence interval  
+  summarise(mean_weight = mean(weight, na.rm = TRUE),
+            sd_weight = sd(weight, na.rm=TRUE),
+            count = n(),
+            se_weight = sd_weight/sqrt(count),
+            t_critical = qt(0.975, count-1), 
+            margin_of_error = t_critical * se_weight,
+            
+# Creating the confidence interval as the spread bewtween &#39;lower&#39; and &#39;upper&#39;            
+            lower = mean_weight - t_critical * se_weight,
+            upper = mean_weight + t_critical * se_weight)</code></pre>
+<pre><code>## # A tibble: 2 x 9
+##   physical_3plus mean_weight sd_weight count se_weight t_critical
+##   &lt;chr&gt;                &lt;dbl&gt;     &lt;dbl&gt; &lt;int&gt;     &lt;dbl&gt;      &lt;dbl&gt;
+## 1 no                    66.7      17.6  4404     0.266       1.96
+## 2 yes                   68.4      16.5  8906     0.175       1.96
+## # … with 3 more variables: margin_of_error &lt;dbl&gt;, lower &lt;dbl&gt;, upper &lt;dbl&gt;</code></pre>
+<p>There is an observed difference of about 1.77kg (68.44 - 66.67) and we notice that the two confidence intervals do not overlap. It seems that the difference is at least 95% statistically significant. Let us also conduct a hypothesis test.</p>
+</div>
+<div id="hypothesis-test-with-formula" class="section level2">
+<h2>Hypothesis test with formula</h2>
+<p>The null hypothesis for this test is that the true difference in means is equal to 0 while the alternative hypothesis is that the true difference in means is not equal to 0.</p>
+<pre class="r"><code># Conducting the hypothesis test
+t.test(weight ~ physical_3plus, data = yrbss)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  weight by physical_3plus
+## t = -5, df = 7479, p-value = 9e-08
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -2.42 -1.12
+## sample estimates:
+##  mean in group no mean in group yes 
+##              66.7              68.4</code></pre>
+</div>
+<div id="hypothesis-test-with-infer" class="section level2">
+<h2>Hypothesis test with <code>infer</code></h2>
+<p>Next, we will introduce a new function, <code>hypothesize</code>, that falls into the infer work flow. We will use this method for conducting hypothesis tests. But first, we need to initialize the test, which we will save as <code>obs_diff</code>.</p>
+<pre class="r"><code># Initializing the &#39;hypothesize&#39; test
+obs_diff &lt;- yrbss %&gt;%
+  specify(weight ~ physical_3plus) %&gt;%
+  calculate(stat = &quot;diff in means&quot;, order = c(&quot;yes&quot;, &quot;no&quot;))</code></pre>
+<p>After we have initialized the test, we need to simulate the test on the null distribution, which we will save as null.</p>
+<pre class="r"><code># Simulating previously initialized test on a null distribution
+null_dist &lt;- yrbss %&gt;%
+  specify(weight ~ physical_3plus) %&gt;%
+  hypothesize(null = &quot;independence&quot;) %&gt;%
+  generate(reps = 1000, type = &quot;permute&quot;) %&gt;%
+  calculate(stat = &quot;diff in means&quot;, order = c(&quot;yes&quot;, &quot;no&quot;))</code></pre>
+<p>Here, <code>hypothesize</code> is used to set the null hypothesis as a test for independence, i.e., that there is no difference between the two population means. Also, note that the <code>type</code> argument within generate is set to permute, which is the argument when generating a null distribution for a hypothesis test.</p>
+<p>We can visualize this null distribution with the following code:</p>
+<pre class="r"><code># Visualizing the null distribution
+ggplot(data = null_dist, aes(x = stat)) +
+  geom_histogram()</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" width="648" style="display: block; margin: auto;" />
+We can also calculate the p-value for our hypothesis test using the function <code>infer::get_p_value()</code>.</p>
+<pre class="r"><code># Generating visualization of location of p-value
+null_dist %&gt;% visualize() +
+  shade_p_value(obs_stat = obs_diff, direction = &quot;two-sided&quot;)</code></pre>
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" width="648" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Calculating p-value
+null_dist %&gt;%
+  get_p_value(obs_stat = obs_diff, direction = &quot;two_sided&quot;)</code></pre>
+<pre><code>## # A tibble: 1 x 1
+##   p_value
+##     &lt;dbl&gt;
+## 1       0</code></pre>
+<p>This the standard work flow for performing hypothesis tests.</p>
+</div>
+</div>
