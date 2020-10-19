@@ -1,0 +1,20 @@
+---
+title: "bio"
+author: "Luca Toraldo"
+date: "10/19/2020"
+output: html_document
+---
+
+# My biography
+## The early years
+I was born in 1996 in **Rome**, Italy. There, I grew up in a typical Italian family, composed by my mom, my dad and my two younger sisters. 
+I have always loved the thrill of exploring opportunities and taking the unconventional route. In high school I was the only student in my class to enroll in an exchange programme that took me to a small town outside **New Orleans**, USA, called [Ponchatoula](https://www.google.com/maps/place/Ponchatoula,+LA,+USA/@30.4442683,-90.4743455,13z/data=!3m1!4b1!4m5!3m4!1s0x86273b5793abe2a9:0xf5cd6f227634c1ac!8m2!3d30.4388041!4d-90.4414762).
+Since I was a child I have always loved sports and I have had the honor of representing Italy at several international competitions, both as a *swimmer* and as a member of the *Modern Pentathlon* team. 
+  
+## University life and work experience
+After I graduated from high school I decided to enroll to **Bocconi University** in Milan. Towards the end of my bachelor degree I received an offer from **UBS**, a prestigious investment bank, which prompted me to take a gap year and experience first hand the finance world. Few months later, as my internship in the Milan office of the Swiss bank was coming to an end, I was lucky enough to receive an offer for an off-cycle internship at **Macquarie Capital** in London.
+Currently, I am studying towards the *Master in Financial Analysis* at **LBS**, one of the most prestigious and renowned business schools in the globe. 
+  
+![An aerial view of Rome, my hometown](https://sofitel.accor.com/destinations/imagerie/roma-overview-1400x788-1-c962_1400x788.jpg)
+
+
