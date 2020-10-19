@@ -1,0 +1,194 @@
+---
+title: "General Social Survey (GSS)"
+author: "Luca Toraldo"
+date: "10/19/2020"
+output: html_document
+---
+
+
+
+<div id="general-social-survey-gss" class="section level1">
+<h1>General Social Survey (GSS)</h1>
+<p>The <a href="http://www.gss.norc.org/">General Social Survey (GSS)</a> gathers data on American society in order to monitor and explain trends in attitudes, behaviors, and attributes. Many trends have been tracked for decades, so one can see the evolution of attitudes, etc. in American society.</p>
+<p>Here, we analyze data from the <strong>2016 GSS sample data</strong>, using it to estimate values of <em>population parameters</em> of interest about US adults. The GSS sample data file has 2,867 observations of 935 variables, but we are only interested in very few of these variables.</p>
+<pre class="r"><code>gss &lt;- read_csv(here::here(&quot;data&quot;, &quot;smallgss2016.csv&quot;), 
+                na = c(&quot;&quot;, &quot;Don&#39;t know&quot;,
+                       &quot;No answer&quot;, &quot;Not applicable&quot;))</code></pre>
+<p>Many responses will not be taken into consideration, like “No Answer,” “Don’t Know,” “Not applicable,” and “Refused to Answer.”</p>
+<p>We will be creating 95% confidence intervals for population parameters. The variables we have are the following:</p>
+<ul>
+<li>hours and minutes spent on email weekly. The responses to these questions are recorded in the <code>emailhr</code> and <code>emailmin</code> variables. For example, if the response is 2.50 hours, this would be recorded as emailhr = 2 and emailmin = 30.</li>
+<li><code>snapchat</code>, <code>instagrm</code>, <code>twitter</code>: whether respondents used these social media in 2016</li>
+<li><code>sex</code>: Female - Male</li>
+<li><code>degree</code>: highest education level attained</li>
+</ul>
+<div id="instagram-and-snapchat-by-sex" class="section level2">
+<h2>Instagram and Snapchat, by sex</h2>
+<p>Can we estimate the <em>population</em> proportion of Snapchat or Instagram users in 2016?</p>
+<p>First, we will create a new variable, <code>snap_insta</code> that is <em>Yes</em> if the respondent reported using any of Snapchat (<code>snapchat</code>) or Instagram (<code>instagrm</code>), and <em>No</em> if not. If the recorded value was NA for both of these questions, the value in the new variable will also be NA.</p>
+<pre class="r"><code>gss_v2 &lt;- gss %&gt;% 
+  na_if(&quot;NA&quot;) %&gt;% 
+  mutate(snap_insta=ifelse(snapchat == &quot;NA&quot; &amp; instagrm == &quot;NA&quot;, &quot;NA&quot;, 
+                      ifelse(snapchat == &quot;Yes&quot; | instagrm == &quot;Yes&quot;, &quot;Yes&quot;, &quot;No&quot;)))
+gss_v2</code></pre>
+<pre><code>## # A tibble: 2,867 x 8
+##    emailmin emailhr snapchat instagrm twitter sex    degree         snap_insta
+##    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;chr&gt;     
+##  1 0        12      &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Male   Bachelor       &lt;NA&gt;      
+##  2 30       0       No       No       No      Male   High school    No        
+##  3 &lt;NA&gt;     &lt;NA&gt;    No       No       No      Male   Bachelor       No        
+##  4 10       0       &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Female High school    &lt;NA&gt;      
+##  5 &lt;NA&gt;     &lt;NA&gt;    Yes      Yes      No      Female Graduate       Yes       
+##  6 0        2       No       Yes      No      Female Junior college Yes       
+##  7 0        40      &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Male   High school    &lt;NA&gt;      
+##  8 &lt;NA&gt;     &lt;NA&gt;    Yes      Yes      No      Female High school    Yes       
+##  9 0        0       &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Male   High school    &lt;NA&gt;      
+## 10 &lt;NA&gt;     &lt;NA&gt;    No       No       No      Male   Junior college No        
+## # … with 2,857 more rows</code></pre>
+<p>Second, we will calculate the proportion of Yes’s for <code>snap_insta</code> among those who answered the question, excluding NAs.</p>
+<pre class="r"><code>gss_v3 &lt;- gss_v2 %&gt;%
+  filter(! is.na(snap_insta)) %&gt;%
+  mutate(user = ifelse(snap_insta == &quot;Yes&quot;, 1, 0)) %&gt;% 
+  summarise(total = length(user), answer_yes = sum(user)) %&gt;%
+  mutate(prop = answer_yes / total) 
+gss_v3</code></pre>
+<pre><code>## # A tibble: 1 x 3
+##   total answer_yes  prop
+##   &lt;int&gt;      &lt;dbl&gt; &lt;dbl&gt;
+## 1  1372        514 0.375</code></pre>
+<p>Third, using the CI formula for proportions, we will construct 95% CIs for men and women who used either Snapchat or Instagram.</p>
+<pre class="r"><code>gss_v4 &lt;- gss_v2 %&gt;% 
+  filter(!is.na(snap_insta)) %&gt;%
+  mutate(user = ifelse(snap_insta == &quot;Yes&quot;, 1, 0)) %&gt;%
+  group_by(sex) %&gt;%
+  summarise(total = length(user), answer_yes = sum(user)) %&gt;% 
+  mutate(prop = answer_yes / total)
+gss_v5 &lt;- gss_v4 %&gt;% 
+  group_by(sex) %&gt;%
+  summarise(lower_95 = prop - qt(0.975, total - 1) * sqrt((prop * (1 - prop)) / total), 
+            upper_95 = prop + qt(0.975, total - 1) * sqrt((prop * (1 - prop)) / total))
+gss_v5</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   sex    lower_95 upper_95
+##   &lt;chr&gt;     &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Female    0.384    0.454
+## 2 Male      0.281    0.356</code></pre>
+</div>
+<div id="twitter-by-education-level" class="section level2">
+<h2>Twitter, by education level</h2>
+<p>Now we will estimate the <em>population</em> proportion of Twitter users by education level in 2016.</p>
+<p>There are 5 education levels in variable <code>degree</code> which, in ascending order of years of education, are Lt high school, High School, Junior college, Bachelor, Graduate.</p>
+<p>First, we will turn <code>degree</code> from a character variable into a factor variable, making sure the order is correct and that levels are not sorted alphabetically.</p>
+<pre class="r"><code>gss_degree &lt;- gss %&gt;% 
+  na_if(&quot;NA&quot;) %&gt;% 
+  mutate(degree = factor(degree, levels = c(&quot;Lt high school&quot;, &quot;High School&quot;, &quot;Junior college&quot;, &quot;Bachelor&quot;, &quot;Graduate&quot;))) %&gt;%
+  filter(!is.na(degree))
+str(gss_degree$degree)</code></pre>
+<pre><code>##  Factor w/ 5 levels &quot;Lt high school&quot;,..: 4 4 5 3 3 1 1 5 1 1 ...</code></pre>
+<p>Next we will create a new variable, <code>bachelor_graduate</code>, that is <em>Yes</em> if the respondent has either a <code>Bachelor</code> or <code>Graduate</code> degree. As before, if the recorded value for either was NA, the value in the new variable will also be NA.</p>
+<pre class="r"><code>bachelor_graduate &lt;- gss_degree %&gt;% 
+  mutate(bachelor_graduate = ifelse(degree == &quot;&quot;, &quot;&quot;,
+                      ifelse(degree == &quot;Bachelor&quot;|degree == &quot;Graduate&quot;, &quot;Yes&quot;, &quot;No&quot;)))
+bachelor_graduate</code></pre>
+<pre><code>## # A tibble: 1,398 x 8
+##    emailmin emailhr snapchat instagrm twitter sex    degree     bachelor_gradua…
+##    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;  &lt;fct&gt;      &lt;chr&gt;           
+##  1 0        12      &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Male   Bachelor   Yes             
+##  2 &lt;NA&gt;     &lt;NA&gt;    No       No       No      Male   Bachelor   Yes             
+##  3 &lt;NA&gt;     &lt;NA&gt;    Yes      Yes      No      Female Graduate   Yes             
+##  4 0        2       No       Yes      No      Female Junior co… No              
+##  5 &lt;NA&gt;     &lt;NA&gt;    No       No       No      Male   Junior co… No              
+##  6 30       0       No       No       No      Male   Lt high s… No              
+##  7 0        1       &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Female Lt high s… No              
+##  8 0        1       Yes      No       Yes     Male   Graduate   Yes             
+##  9 &lt;NA&gt;     &lt;NA&gt;    No       Yes      No      Female Lt high s… No              
+## 10 0        1       Yes      Yes      No      Female Lt high s… No              
+## # … with 1,388 more rows</code></pre>
+<p>Then we will calculate the proportion of <code>bachelor_graduate</code> who do (Yes) and who don’t (No) use Twitter.</p>
+<pre class="r"><code>proportion_bachelor_graduate &lt;- bachelor_graduate %&gt;% 
+  filter(!is.na(twitter)) %&gt;% 
+  filter(bachelor_graduate == &quot;Yes&quot;) %&gt;% 
+  group_by(twitter) %&gt;% 
+  summarise(count = n()) %&gt;%
+mutate(prop = count / sum(count))
+proportion_bachelor_graduate</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   twitter count  prop
+##   &lt;chr&gt;   &lt;int&gt; &lt;dbl&gt;
+## 1 No        375 0.767
+## 2 Yes       114 0.233</code></pre>
+<p>Finally, using the CI formula for proportions, we construct two 95% CIs for <code>bachelor_graduate</code> depending on whether they use (Yes) and don’t (No) use Twitter.</p>
+<pre class="r"><code>CI_bachelor_graduate &lt;- proportion_bachelor_graduate %&gt;% 
+  mutate(total = sum(count)) 
+CI_bachelor_graduate %&gt;% 
+  group_by(twitter) %&gt;%
+  summarise(lower_95 = prop - qt(0.975, total - 1) * sqrt((prop * (1 - prop)) / total),
+            upper_95 = prop + qt(0.975, total - 1) * sqrt((prop * (1 - prop)) / total))</code></pre>
+<pre><code>## # A tibble: 2 x 3
+##   twitter lower_95 upper_95
+##   &lt;chr&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+## 1 No         0.729    0.804
+## 2 Yes        0.196    0.271</code></pre>
+<p>The two confidence intervals do not overlap.</p>
+</div>
+<div id="email-usage" class="section level2">
+<h2>Email usage</h2>
+<p>Can we estimate the <em>population</em> parameter on time spent on email weekly?</p>
+<p>First, we will create a new variable called <code>email</code> that combines <code>emailhr</code> and <code>emailmin</code> to reports the number of minutes the respondents spend on email weekly.</p>
+<pre class="r"><code>gss_email &lt;- gss %&gt;%
+  na_if(&quot;NA&quot;) %&gt;%
+  mutate(email = as.numeric(emailhr) * 60 + as.numeric(emailmin))
+gss_email</code></pre>
+<pre><code>## # A tibble: 2,867 x 8
+##    emailmin emailhr snapchat instagrm twitter sex    degree         email
+##    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;    &lt;chr&gt;    &lt;chr&gt;   &lt;chr&gt;  &lt;chr&gt;          &lt;dbl&gt;
+##  1 0        12      &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Male   Bachelor         720
+##  2 30       0       No       No       No      Male   High school       30
+##  3 &lt;NA&gt;     &lt;NA&gt;    No       No       No      Male   Bachelor          NA
+##  4 10       0       &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Female High school       10
+##  5 &lt;NA&gt;     &lt;NA&gt;    Yes      Yes      No      Female Graduate          NA
+##  6 0        2       No       Yes      No      Female Junior college   120
+##  7 0        40      &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Male   High school     2400
+##  8 &lt;NA&gt;     &lt;NA&gt;    Yes      Yes      No      Female High school       NA
+##  9 0        0       &lt;NA&gt;     &lt;NA&gt;     &lt;NA&gt;    Male   High school        0
+## 10 &lt;NA&gt;     &lt;NA&gt;    No       No       No      Male   Junior college    NA
+## # … with 2,857 more rows</code></pre>
+<p>Next, we will visualize the distribution of this new variable.</p>
+<pre class="r"><code>gss_mean_median &lt;- gss_email %&gt;%
+  select(email) %&gt;% 
+  filter(! is.na(email)) %&gt;%
+  summarise(mean = mean(email), median = median(email))
+gss_mean_median</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##    mean median
+##   &lt;dbl&gt;  &lt;dbl&gt;
+## 1  417.    120</code></pre>
+<pre class="r"><code>gss_email %&gt;% 
+  filter(! is.na(email)) %&gt;%
+ggplot(aes(x = email)) + 
+  geom_density() +
+  labs(subtitle = &quot;Distribution of minutes spent on email weekly&quot;,
+       title = &quot;Snail Mail Still Rules&quot;,
+       caption = &quot;Source: General Social Survey&quot;,
+       x = &quot;Minutes spent on email weekly&quot;,
+       y = &quot;&quot;) +
+  theme_bw()</code></pre>
+<p><img src="index_files/figure-html/email%20distribution-1.png" width="648" style="display: block; margin: auto;" />
+As the variable “email” has a heavily right skew distribution, the most appropriate measure of the typical amount of time Americans spend on email is the median as it is less affected by extreme values of the considered variable.</p>
+<p>Finally, using the <code>infer</code> package, we will calculate a 95% bootstrap confidence interval for the mean amount of time Americans spend on email weekly.</p>
+<pre class="r"><code>gss_email_bootstrap &lt;- gss_email %&gt;%
+  filter(! is.na(email)) %&gt;%
+  specify(response = email) %&gt;% 
+  generate(reps = 1000, type = &quot;bootstrap&quot;) %&gt;%
+  calculate(stat = &quot;mean&quot;)
+gss_email_CI &lt;- gss_email_bootstrap %&gt;%
+  get_ci(level = 0.95, type = &quot;percentile&quot;)
+gss_email_CI</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   lower_ci upper_ci
+##      &lt;dbl&gt;    &lt;dbl&gt;
+## 1     386.     451.</code></pre>
+<p>Our 95% bootstrap confidence interval shows that, with 95% confidence, the true mean amount of time Americans spend on email weekly falls between the following two values: 6 hours and 27 minutes and 7 hours and 30 minutes. Taking into consideration the graphic distribution of the variable, the result seems to exaggerate the actual amount of time Americans spend checking their emails. We believe the presence of extreme values, combined with the right skew distribution of the variable, can explain the overestimation.</p>
+<p>We would expect a 99% confidence interval to be wider because it would need to capture a greater share of the possible values. For this reason, the higher the confidence level, the wider the interval is.</p>
+</div>
+</div>
