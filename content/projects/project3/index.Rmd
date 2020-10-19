@@ -34,7 +34,7 @@ library(tidytext)
 ```
 
 
-As we saw earlier, fivethirtyeight.com has detailed data on [all polls that track the president's approval](https://projects.fivethirtyeight.com/trump-approval-ratings)
+fivethirtyeight.com has detailed data on [all polls that track the president's approval](https://projects.fivethirtyeight.com/trump-approval-ratings)
 ```{r, cache=TRUE}
 approval_polllist <- read_csv(here::here('data', 'approval_polllist.csv'))
 glimpse(approval_polllist)

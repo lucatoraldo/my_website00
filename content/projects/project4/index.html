@@ -96,7 +96,7 @@ weight_ci</code></pre>
 <pre><code>## # A tibble: 1 x 2
 ##   lower_ci upper_ci
 ##      &lt;dbl&gt;    &lt;dbl&gt;
-## 1    0.323    0.338</code></pre>
+## 1    0.323    0.339</code></pre>
 <p>Below is a boxplot of <code>physical_3plus</code> vs. <code>weight</code>. There appears to be a weak relationship between these two variables. Both medians are around the 60 to 70 kg range and both categories contain a high number of outliers on the higher end. While this is generally not what would be expected from this information, a possible shortcoming is that ‘weight’ captures both fat and muscle, meaning that some of the high-end outliers for the ‘yes’ group could be students that are highly fit and muscular.</p>
 <pre class="r"><code># Creating boxplot broken down by &#39;physical_3plus&#39;
 weight_box &lt;- yrbss %&gt;% 
